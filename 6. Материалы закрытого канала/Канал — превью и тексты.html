@@ -73,12 +73,9 @@ function render(p){
     if(!/^(1️⃣|2️⃣|3️⃣|   )/.test(line))return line;
     return line.replace(/(Новая идентичность|Формула личной реальности|Основа|Введение|Урок 1[01]|Урок \d)/g,m=>{const n=TOC[m],u=links[n];return u?`<a href="${esc(u)}">${m}</a>`:m})})}
   return t}
-// 23.10: при копировании переносы строк, пустые строки и отступы сохраняются: 
- → <br>, подряд идущие пробелы → &nbsp;
-function plain(html){const d=document.createElement('div');d.innerHTML=html.replace(/
-/g,'<br>');document.body.appendChild(d);const t=d.innerText;d.remove();return t}
-function clipHtml(html){return html.replace(/ {2,}/g,m=>'&nbsp;'.repeat(m.length)).replace(/
-/g,'<br>')}
+// 23.10: при копировании переносы строк, пустые строки и отступы сохраняются: перенос → <br>, подряд идущие пробелы → &nbsp;
+function plain(html){const d=document.createElement('div');d.innerHTML=html.replace(/\n/g,'<br>');document.body.appendChild(d);const t=d.innerText;d.remove();return t}
+function clipHtml(html){return html.replace(/ {2,}/g,m=>'&nbsp;'.repeat(m.length)).replace(/\n/g,'<br>')}
 function feed(){const f=document.getElementById('feed');f.innerHTML='';
  POSTS.forEach(p=>{const el=document.createElement('div');el.className='post'+(done[p.n]?' done':'');el.id='p'+p.n;
   let media='';
