@@ -73,7 +73,12 @@ function render(p){
     if(!/^(1️⃣|2️⃣|3️⃣|   )/.test(line))return line;
     return line.replace(/(Новая идентичность|Формула личной реальности|Основа|Введение|Урок 1[01]|Урок \d)/g,m=>{const n=TOC[m],u=links[n];return u?`<a href="${esc(u)}">${m}</a>`:m})})}
   return t}
-function plain(html){const d=document.createElement('div');d.innerHTML=html;return d.innerText}
+// 23.10: при копировании переносы строк, пустые строки и отступы сохраняются: 
+ → <br>, подряд идущие пробелы → &nbsp;
+function plain(html){const d=document.createElement('div');d.innerHTML=html.replace(/
+/g,'<br>');document.body.appendChild(d);const t=d.innerText;d.remove();return t}
+function clipHtml(html){return html.replace(/ {2,}/g,m=>'&nbsp;'.repeat(m.length)).replace(/
+/g,'<br>')}
 function feed(){const f=document.getElementById('feed');f.innerHTML='';
  POSTS.forEach(p=>{const el=document.createElement('div');el.className='post'+(done[p.n]?' done':'');el.id='p'+p.n;
   let media='';
@@ -92,9 +97,9 @@ function feed(){const f=document.getElementById('feed');f.innerHTML='';
   f.appendChild(el)})}
 function copy(html,btn){
  const ok=()=>{btn.textContent='Скопировано ✓';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Скопировать текст';btn.classList.remove('ok')},1600)};
- const fallback=()=>{const d=document.createElement('div');d.contentEditable=true;d.style.cssText='position:fixed;left:-9999px;white-space:pre-wrap';d.innerHTML=html;document.body.appendChild(d);
+ const fallback=()=>{const d=document.createElement('div');d.contentEditable=true;d.style.cssText='position:fixed;left:-9999px;white-space:pre-wrap';d.innerHTML=clipHtml(html);document.body.appendChild(d);
    const r=document.createRange();r.selectNodeContents(d);const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');ok()}catch(e){}s.removeAllRanges();d.remove()};
- const full=`<div style="white-space:pre-wrap">${html}</div>`;
+ const full=`<div style="white-space:pre-wrap">${clipHtml(html)}</div>`;
  try{if(window.ClipboardItem&&navigator.clipboard){navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([full],{type:'text/html'}),'text/plain':new Blob([plain(html)],{type:'text/plain'})})]).then(ok,fallback);return}}catch(e){}
  fallback()}
 function toc(){const t=document.getElementById('toc');t.innerHTML=POSTS.map(p=>`<a href="#p${p.n}" class="${done[p.n]?'done':''}"><span class="n">${p.n}</span>${esc(p.head)}${p.pin?' 📌':''}</a>`).join('')}
